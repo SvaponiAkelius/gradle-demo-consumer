@@ -1,0 +1,56 @@
+group 'io.github.svaponi'
+version '1.0'
+description "Demo project with Gradle (project.name: ${project.name})"
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+
+// create file ~/.gradle/gradle.properties with following properties
+//artifactory_baseurl=YOUR_ARTIFACTORY_URL
+//artifactory_username=YOUR_ACTIVE_DIRECTORY_USER
+//artifactory_password=********
+
+repositories {
+    mavenLocal()
+    maven {
+        url artifactory_baseurl + '/libs-release'
+        credentials {
+            username artifactory_username
+            password artifactory_password
+        }
+    }
+    maven {
+        url artifactory_baseurl + '/libs-snapshot'
+        credentials {
+            username artifactory_username
+            password artifactory_password
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.github.svaponi:gradle-demo:1.0'
+    testCompile 'junit:junit:4.12'
+}
+
+test {
+    dependsOn cleanTest
+    testLogging {
+        events 'passed'
+        showStandardStreams true
+        exceptionFormat 'full'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.github.svaponi.democonsumer.DemoConsumer'
+    }
+    from {
+        // include dependencies into a single Jar
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
